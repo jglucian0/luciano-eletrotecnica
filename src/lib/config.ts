@@ -3,8 +3,8 @@ export const WHATSAPP_NUMBER = "554396235122";
 export const PHONE_LABEL = "(43) 9 9623-5122";
 export const EMAIL = "contato@lucianoeletrotecnica.com.br";
 export const CITY = "Guarapuava · PR, Manoel Ribas · PR, Ivaiporã · PR";
-export const GOOGLE_REVIEWS_URL = "";
-export const CNPJ = "";
+export const GOOGLE_REVIEWS_URL = "https://share.google/849xPvIZvsl0eFD8J";
+export const CNPJ = "55.432.100/0001-99";
 export const LEGAL_UPDATED = "5 de novembro de 2026";
 
 export const CITIES = CITY.split(",")
