@@ -41,6 +41,9 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
   formatDetection: { telephone: false },
+  verification: {
+    google: "zEZrKCzYWXDSTyz3PhsPSOY7vrD16DsHRtoOlaxLK2A",
+  },
   // verification: { google: "CÓDIGO_DO_SEARCH_CONSOLE" },
 };
 
