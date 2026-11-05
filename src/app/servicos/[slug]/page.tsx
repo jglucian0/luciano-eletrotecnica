@@ -26,7 +26,7 @@ const serviceIcon: Record<string, IconName> = {
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamicParams = false; // endereços que não existem retornam 404 direto
+// export const dynamicParams = false; // endereços que não existem retornam 404 direto estava causando conflito 
 
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
