@@ -1,3 +1,4 @@
+export const SITE_NAME = "Luciano Eletrotécnica";
 export const SITE_URL = "https://www.lucianoeletrotecnica.com.br";
 export const WHATSAPP_NUMBER = "554396235122";
 export const PHONE_LABEL = "(43) 9 9623-5122";
@@ -18,7 +19,21 @@ export const CITY_LIST =
     ? `${CITY_NAMES.slice(0, -1).join(", ")} e ${CITY_NAMES[CITY_NAMES.length - 1]}`
     : CITY_NAMES[0];
 
+export const SITE_DESCRIPTION = `Serviços elétricos, segurança eletrônica, instalação de TV e Starlink para casas e empresas em ${CITY_LIST} (PR). Peça seu orçamento pelo WhatsApp.`;
+
 export const buildWhatsAppUrl = (text: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+
+export const BUSINESS_ADDRESS = {
+  street: "", // Rua/Avenida e número, ex.: "Rua Exemplo, 123"
+  neighborhood: "", // Bairro
+  city: "Manoel Ribas",
+  region: "PR",
+  postalCode: "", // CEP, ex.: "00000-000"
+  country: "BR",
+};
+
+export const MAIN_CITY = BUSINESS_ADDRESS.city;
+export const GEO: { latitude?: number; longitude?: number } = {};
 
 export const WHATSAPP_URL = buildWhatsAppUrl("Olá, encontrei um anuncio seu e preciso dos seus serviços");

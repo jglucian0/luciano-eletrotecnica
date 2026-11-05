@@ -9,6 +9,8 @@ import WhatsAppLink from "@/components/WhatsAppLink";
 import { CITIES, CITY_LIST, CITY_NAMES, PHONE_LABEL, WHATSAPP_NUMBER, buildWhatsAppUrl } from "@/lib/config";
 import AboutShowcase, { type AboutStat, type AboutValue } from "@/components/AboutShowcase";
 import ProcessTimeline, { type FlowStep } from "@/components/ProcessTimeline";
+import JsonLd from "@/components/JsonLd";
+import { businessNode, schemaGraph } from "@/lib/schema";
 
 const serviceIcon: Record<string, IconName> = {
   eletrica: "bolt",
@@ -137,6 +139,7 @@ const testimonials: Testimonial[] = realTestimonials.length
 export default function Home() {
   return (
     <main>
+      <JsonLd data={schemaGraph(businessNode())} />
       {/* HERO */}
       <section id="inicio" className="hero" suppressHydrationWarning>
         <div className="hero__bg" aria-hidden />
@@ -161,8 +164,9 @@ export default function Home() {
               src="/foto_header_fundo.png"
               alt=""
               fill
-              priority
-              sizes="(max-width: 960px) 100vw, 530px"
+              loading="eager"
+              fetchPriority="low"
+              sizes="(max-width: 960px) 420px, 580px"
               quality={75}
               style={{ objectFit: "cover" }}
             />
@@ -175,7 +179,7 @@ export default function Home() {
               alt="Luciano Eletrotécnica - Atendimento Profissional"
               fill
               priority
-              sizes="(max-width: 960px) 100vw, 530px"
+              sizes="(max-width: 960px) 420px, 580px"
               quality={80}
               style={{ objectFit: "cover" }}
             />

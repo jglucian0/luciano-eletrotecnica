@@ -2216,6 +2216,13 @@ button:focus-visible {
   outline-offset: 4px;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 /* Entrada suave ao trocar de página */
 main {
   animation: page-in var(--t-slow) var(--ease);
@@ -2227,6 +2234,13 @@ main {
 
 /* Evita rolagem horizontal causada pelas animações laterais (esquerda/direita) */
 body {
+  font-family:
+    var(--font-inter),
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   overflow-x: clip;
 }
 

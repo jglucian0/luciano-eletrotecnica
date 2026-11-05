@@ -1,3 +1,4 @@
+import JsonLd from "@/components/JsonLd";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -5,12 +6,12 @@ import { Suspense } from "react";
 import Reveal from "@/components/Reveal";
 import WhatsAppLink from "@/components/WhatsAppLink";
 import Icon, { type IconName } from "@/components/Icon";
-import JsonLd from "@/components/JsonLd";
 import { services, getService } from "@/lib/services";
+import { breadcrumbNode, businessNode, schemaGraph, serviceNode, serviceUrl } from "@/lib/schema";
 import {
   CITIES,
   CITY_LIST,
-  CITY_NAMES,
+  MAIN_CITY,
   PHONE_LABEL,
   SITE_URL,
   WHATSAPP_NUMBER,
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = getService(slug);
   if (!s) return {};
 
-  const title = `${s.title} em ${CITY_NAMES[0]} e região`;
+  const title = `${s.title} em ${MAIN_CITY} e região`;
   const description = `${s.heroLead} Atendemos ${CITY_LIST} (PR). Orçamento pelo WhatsApp.`;
   const url = `/servicos/${s.slug}`;
 
@@ -63,27 +64,14 @@ async function ServiceContent({ params }: Props) {
   if (!s) notFound();
 
   const url = `${SITE_URL}/servicos/${s.slug}`;
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Service",
-        name: s.title,
-        serviceType: s.title,
-        description: s.heroLead,
-        url,
-        provider: { "@type": "Electrician", name: "Luciano Eletrotécnica", url: SITE_URL },
-        areaServed: CITY_NAMES.map((name) => ({ "@type": "City", name })),
-      },
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          { "@type": "ListItem", position: 1, name: "Início", item: SITE_URL },
-          { "@type": "ListItem", position: 2, name: s.title, item: url },
-        ],
-      },
-    ],
-  };
+  const jsonLd = schemaGraph(
+    businessNode(),
+    serviceNode(s),
+    breadcrumbNode([
+      { name: "Início", url: SITE_URL },
+      { name: s.title, url: serviceUrl(s.slug) },
+    ])
+  );
 
   return (
     <main>

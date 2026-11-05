@@ -1,5 +1,4 @@
-"use client";
-
+import BackToTop from "@/components/BackToTop";
 import Image from "next/image";
 import Link from "next/link";
 import WhatsAppLink from "@/components/WhatsAppLink";
@@ -31,9 +30,7 @@ export default function Footer() {
             ) : (
               <span>{CITIES[0]}</span>
             )}
-            <button className="totop" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-              Voltar ao topo ↑
-            </button>
+            <BackToTop />
           </div>
         </div>
 
