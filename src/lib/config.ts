@@ -19,7 +19,7 @@ export const CITY_LIST =
     ? `${CITY_NAMES.slice(0, -1).join(", ")} e ${CITY_NAMES[CITY_NAMES.length - 1]}`
     : CITY_NAMES[0];
 
-export const SITE_DESCRIPTION = `Serviços elétricos, segurança eletrônica, instalação de TV e Starlink para casas e empresas em ${CITY_LIST} (PR). Peça seu orçamento pelo WhatsApp.`;
+export const SITE_DESCRIPTION = `Eletricista em ${CITY_LIST} (PR): elétrica, câmeras e alarmes, TV e Starlink para casas e empresas. Peça orçamento no WhatsApp.`;
 
 export const buildWhatsAppUrl = (text: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;

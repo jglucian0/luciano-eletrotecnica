@@ -16,6 +16,7 @@ import {
   type ReactNode,
 } from "react";
 
+
 const DURATION = 700; // duração do deslize (ms)
 const AUTOPLAY = 5000; // intervalo da rolagem automática (ms)
 const MAX_PV = 3; // máximo de cards visíveis (computador)
@@ -48,6 +49,7 @@ export default function TestimonialCarousel({ children, label, onlyIfOverflow = 
   const inView = useRef(true);
   const reduced = useRef(false);
   const drag = useRef({ active: false, startX: 0, moved: false });
+  const fresh = useRef(false);
 
   const fits = n <= pv && (onlyIfOverflow || n < 2);
 
@@ -86,7 +88,7 @@ export default function TestimonialCarousel({ children, label, onlyIfOverflow = 
   const settle = useCallback(() => {
     offset.current = mod(offset.current, n);
     apply(false);
-    trackRef.current?.getBoundingClientRect(); // aplica o estado antes do próximo movimento
+    fresh.current = true;
     syncInert();
   }, [n, apply, syncInert]);
 
@@ -95,11 +97,17 @@ export default function TestimonialCarousel({ children, label, onlyIfOverflow = 
     (delta: number) => {
       if (n === 0 || delta === 0) return;
       offset.current = Math.min(maxOff, Math.max(minOff, offset.current + delta));
-      apply(true);
+      if (fresh.current) {
+        // Anima só depois de dois frames, em vez de forçar um reflow síncrono
+        fresh.current = false;
+        requestAnimationFrame(() => requestAnimationFrame(() => apply(true)));
+      } else {
+        apply(true);
+      }
       setCurrent(mod(offset.current, n));
       syncInert();
       if (idle.current) clearTimeout(idle.current);
-      idle.current = setTimeout(settle, DURATION + 60);
+      idle.current = setTimeout(settle, DURATION + 100);
     },
     [n, maxOff, minOff, apply, syncInert, settle]
   );

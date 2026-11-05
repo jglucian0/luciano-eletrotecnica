@@ -161,7 +161,7 @@ export default function Home() {
           {/* Camada de fundo (desincronizada) */}
           <div className="hero__layer hero__layer--bg">
             <Image
-              src="/foto_header_fundo.png"
+              src="/foto_header_fundo.webp"
               alt=""
               fill
               loading="eager"
@@ -175,7 +175,7 @@ export default function Home() {
           {/* Camada frontal (desincronizada) */}
           <div className="hero__layer hero__layer--fg">
             <Image
-              src="/foto_header.png"
+              src="/foto_header.webp"
               alt="Luciano Eletrotécnica - Atendimento Profissional"
               fill
               priority

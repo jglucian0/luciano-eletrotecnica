@@ -6,11 +6,13 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import ScrollEffects from "@/components/ScrollEffects";
 import { MAIN_CITY, SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/config";
+import { DESCRIPTION_MAX, TITLE_MAX, fitText } from "@/lib/seo";
 
 // next/font hospeda a fonte no próprio site e ajusta a fonte reserva (CLS zero)
 const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--font-inter" });
 
-const title = `Eletricista em ${MAIN_CITY} e região | ${SITE_NAME}`;
+const title = fitText(`Eletricista em ${MAIN_CITY} e região | ${SITE_NAME}`, TITLE_MAX);
+const description = fitText(SITE_DESCRIPTION, DESCRIPTION_MAX);
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

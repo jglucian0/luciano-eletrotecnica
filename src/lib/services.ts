@@ -12,6 +12,7 @@ export type Service = {
   whatsappText: string;
   solutions: Solution[];
   ctaTitle: string;
+  metaDescription: string;
 };
 
 export const services: Service[] = [
@@ -21,6 +22,8 @@ export const services: Service[] = [
     title: "Elétrica",
     short: "Instalações e manutenções elétricas residenciais e comerciais.",
     image: "/servicos/eletrica.png",
+    metaDescription:
+      "Eletricista em {cidade} e região: instalações, quadros de energia (QDC), manutenção e iluminação para casas e empresas. Peça orçamento no WhatsApp.",
     bullets: [
       "Elétrica completa para casas novas e reformas",
       "Montagem e manutenção de quadros elétricos (QDC)",
@@ -82,6 +85,8 @@ export const services: Service[] = [
     title: "Segurança eletrônica",
     short: "CFTV, alarmes e controle de acesso para residências e empresas.",
     image: "/servicos/seguranca-eletronica.png",
+    metaDescription:
+      "Câmeras de segurança (CFTV), alarmes e controle de acesso em {cidade} e região, com instalação profissional. Peça orçamento no WhatsApp.",
     bullets: [
       "Instalação de câmeras de segurança (CFTV)",
       "Sistemas de alarme residencial e comercial",
@@ -143,6 +148,8 @@ export const services: Service[] = [
     title: "Soluções para TV",
     short: "Instalação e configuração para a sua TV e sistema de som.",
     image: "/servicos/solucoes-tv.png",
+    metaDescription:
+      "Instalação de TV na parede, antenas digitais e parabólicas, home theater e organização de cabos em {cidade} e região. Peça orçamento no WhatsApp.",
     bullets: [
       "Instalação de TV na parede",
       "Antenas digitais e parabólicas",
@@ -203,6 +210,8 @@ export const services: Service[] = [
     title: "Starlink Residencial e Móvel",
     short: "Internet via satélite de alta velocidade para sua casa, empresa ou veículos.",
     image: "/servicos/starlink.png",
+    metaDescription:
+      "Instalação profissional de Starlink residencial e móvel em {cidade} e região: internet via satélite de alta velocidade. Peça orçamento no WhatsApp.",
     bullets: [
       "Instalação profissional de antenas residenciais",
       "Conectividade móvel para motorhomes e embarcações",

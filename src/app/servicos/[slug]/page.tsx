@@ -8,12 +8,14 @@ import WhatsAppLink from "@/components/WhatsAppLink";
 import Icon, { type IconName } from "@/components/Icon";
 import { services, getService } from "@/lib/services";
 import { breadcrumbNode, businessNode, schemaGraph, serviceNode, serviceUrl } from "@/lib/schema";
+import { DESCRIPTION_MAX, TITLE_MAX, fitText } from "@/lib/seo";
 import {
   CITIES,
   CITY_LIST,
   MAIN_CITY,
   PHONE_LABEL,
   SITE_URL,
+  SITE_NAME,
   WHATSAPP_NUMBER,
   buildWhatsAppUrl,
 } from "@/lib/config";
@@ -38,15 +40,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const s = getService(slug);
   if (!s) return {};
 
-  const title = `${s.title} em ${MAIN_CITY} e região`;
-  const description = `${s.heroLead} Atendemos ${CITY_LIST} (PR). Orçamento pelo WhatsApp.`;
+  const heading = `${s.title} em ${MAIN_CITY}`;
+  // Se com a marca passar de 60 caracteres, usa só o título (sem " | Luciano Eletrotécnica")
+  const withBrand = `${heading} | ${SITE_NAME}`;
+  const title = withBrand.length <= TITLE_MAX ? heading : { absolute: fitText(heading, TITLE_MAX) };
+
+  const description = fitText(s.metaDescription.replace("{cidade}", MAIN_CITY), DESCRIPTION_MAX);
   const url = `/servicos/${s.slug}`;
 
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "website", locale: "pt_BR", url, siteName: "Luciano Eletrotécnica", title, description },
+    openGraph: { type: "website", locale: "pt_BR", url, siteName: SITE_NAME, title: heading, description },
   };
 }
 

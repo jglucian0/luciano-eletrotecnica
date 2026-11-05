@@ -2,9 +2,16 @@ import type { NextConfig } from "next";
 /** @type {import('next').NextConfig} */
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  compress: true,
+  images: {
+    formats: ["image/avif", "image/webp"],
+    qualities: [60, 75, 80],
+  },
   /* config options here */
   experimental: {
     agentFeedback: true,
+    inlineCss: true,
   },
   cacheComponents: true,
   partialPrefetching: true,
@@ -15,10 +22,6 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
-  },
-  images: {
-    qualities: [60, 75, 80],
-    formats: ["image/avif", "image/webp"],
   },
 };
 
