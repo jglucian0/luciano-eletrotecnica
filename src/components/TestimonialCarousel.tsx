@@ -10,106 +10,159 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
   type ReactElement,
   type ReactNode,
 } from "react";
 
-type SlideEl = ReactElement<{ "aria-hidden"?: boolean }>;
-
-const DURATION = 800; // duração do deslize (ms)
+const DURATION = 700; // duração do deslize (ms)
 const AUTOPLAY = 5000; // intervalo da rolagem automática (ms)
+const MAX_PV = 3; // máximo de cards visíveis (computador)
 
-export default function TestimonialCarousel({
-  children,
-  label,
-  onlyIfOverflow = false,
-}: {
+const mod = (a: number, n: number) => ((a % n) + n) % n;
+
+type Props = {
   children: ReactNode;
   label: string;
   /** Se true, só vira carrossel quando há mais cards do que cabem na tela */
   onlyIfOverflow?: boolean;
-}) {
+};
+
+export default function TestimonialCarousel({ children, label, onlyIfOverflow = false }: Props) {
   const items = useMemo(
-    () => Children.toArray(children).filter(isValidElement) as SlideEl[],
+    () => Children.toArray(children).filter(isValidElement) as ReactElement[],
     [children]
   );
   const n = items.length;
 
-  const [pv, setPv] = useState(3); // cards visíveis por vez
-  const [offset, setOffset] = useState(0);
-  const [animate, setAnimate] = useState(false);
+  const [pv, setPv] = useState(MAX_PV); // cards visíveis (só para a lógica; o layout vem do CSS)
+  const [current, setCurrent] = useState(0); // bullet ativo
   const [paused, setPaused] = useState(false);
   const [kick, setKick] = useState(0); // reinicia o contador do autoplay após interação
-  const locked = useRef(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const startX = useRef<number | null>(null);
-  const dragged = useRef(false);
 
-  // Quando todos os cards cabem na tela, não precisa de carrossel
-  const fits = onlyIfOverflow && n <= pv;
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const offset = useRef(0); // posição lógica (pode passar de 0..n-1 em cliques rápidos)
+  const idle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inView = useRef(true);
+  const reduced = useRef(false);
+  const drag = useRef({ active: false, startX: 0, moved: false });
 
-  // Quantos cards aparecem de acordo com a largura da tela
+  const fits = n <= pv && (onlyIfOverflow || n < 2);
+
+  // Cópias suficientes para nunca faltar card, mesmo com poucos itens
+  const mid = n > 0 ? Math.ceil(MAX_PV / n) + 1 : 1;
+  const copies = 2 * mid + 1;
+  const base = mid * n;
+  const minOff = -base;
+  const maxOff = copies * n - base - MAX_PV;
+
+  // Posiciona a trilha (animada ou não) sem passar pelo React
+  const apply = useCallback(
+    (animated: boolean) => {
+      const el = trackRef.current;
+      if (!el) return;
+      el.style.transition = animated
+        ? `transform ${DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`
+        : "none";
+      el.style.setProperty("--pos", String(base + offset.current));
+      el.style.setProperty("--drag", "0px");
+    },
+    [base]
+  );
+
+  // Só os cards visíveis ficam clicáveis e focáveis
+  const syncInert = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    const start = base + offset.current;
+    Array.from(el.children).forEach((child, i) => {
+      child.toggleAttribute("inert", i < start || i >= start + pv);
+    });
+  }, [base, pv]);
+
+  // Quando para de mexer, volta ao conjunto do meio sem animação (visual idêntico)
+  const settle = useCallback(() => {
+    offset.current = mod(offset.current, n);
+    apply(false);
+    trackRef.current?.getBoundingClientRect(); // aplica o estado antes do próximo movimento
+    syncInert();
+  }, [n, apply, syncInert]);
+
+  // Move N cards. Pode ser chamado várias vezes seguidas, sem travar
+  const move = useCallback(
+    (delta: number) => {
+      if (n === 0 || delta === 0) return;
+      offset.current = Math.min(maxOff, Math.max(minOff, offset.current + delta));
+      apply(true);
+      setCurrent(mod(offset.current, n));
+      syncInert();
+      if (idle.current) clearTimeout(idle.current);
+      idle.current = setTimeout(settle, DURATION + 60);
+    },
+    [n, maxOff, minOff, apply, syncInert, settle]
+  );
+
+  // Cards visíveis conforme a largura (mesmos breakpoints do CSS)
   useEffect(() => {
-    const calc = () => {
-      const w = window.innerWidth;
-      setPv(w > 960 ? 3 : w > 640 ? 2 : 1);
-    };
+    const m960 = window.matchMedia("(max-width: 960px)");
+    const m640 = window.matchMedia("(max-width: 640px)");
+    const calc = () => setPv(m640.matches ? 1 : m960.matches ? 2 : 3);
     calc();
-    window.addEventListener("resize", calc);
-    return () => window.removeEventListener("resize", calc);
+    m960.addEventListener("change", calc);
+    m640.addEventListener("change", calc);
+    reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    return () => {
+      m960.removeEventListener("change", calc);
+      m640.removeEventListener("change", calc);
+    };
   }, []);
+
+  // Posição inicial e ajuste quando muda a quantidade de cards visíveis
+  useEffect(() => {
+    apply(false);
+    syncInert();
+  }, [apply, syncInert, fits]);
 
   useEffect(() => {
     return () => {
-      if (timer.current) clearTimeout(timer.current);
+      if (idle.current) clearTimeout(idle.current);
     };
   }, []);
 
-  // Move 1 ou mais cards (positivo = avança, negativo = volta)
-  const move = useCallback(
-    (delta: number) => {
-      if (n === 0 || delta === 0 || locked.current) return;
-      locked.current = true;
-      setAnimate(true);
-      setOffset((o) => o + delta);
+  // Autoplay só roda quando o carrossel está visível na tela
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        inView.current = entry.isIntersecting;
+      },
+      { threshold: 0.2 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [fits]);
 
-      // Ao fim do deslize, volta ao "conjunto do meio" sem animação (visual idêntico)
-      timer.current = setTimeout(() => {
-        setAnimate(false);
-        setOffset((o) => ((o % n) + n) % n);
-        locked.current = false;
-      }, DURATION + 40);
-    },
-    [n]
-  );
-
-  // Rolagem automática (pausa com mouse, foco, toque ou aba oculta)
   useEffect(() => {
     if (n < 2 || paused || fits) return;
     const id = setInterval(() => {
-      if (!document.hidden) move(1);
+      if (!document.hidden && inView.current && !reduced.current) move(1);
     }, AUTOPLAY);
     return () => clearInterval(id);
   }, [n, paused, fits, move, kick]);
 
   if (n === 0) return null;
 
-  // Todos cabem: mostra os cards fixos e centralizados
+  // Todos cabem: cards fixos e centralizados
   if (fits) {
     return (
-      <div
-        className="tcar tcar--static"
-        role="region"
-        aria-label={label}
-        style={{ "--pv": pv } as CSSProperties}
-      >
+      <div className="tcar tcar--static" role="region" aria-label={label}>
         {items}
       </div>
     );
   }
-
-  const current = ((offset % n) + n) % n;
 
   const manual = (delta: number) => {
     move(delta);
@@ -117,55 +170,60 @@ export default function TestimonialCarousel({
   };
 
   const goTo = (i: number) => {
-    let delta = i - current;
-    // caminho mais curto (considerando o loop)
-    if (delta > n / 2) delta -= n;
-    if (delta < -n / 2) delta += n;
-    manual(delta);
+    let d = i - mod(offset.current, n);
+    if (d > n / 2) d -= n; // caminho mais curto
+    if (d < -n / 2) d += n;
+    manual(d);
   };
 
-  // Cópias suficientes para nunca faltar card, mesmo com poucos itens
-  const mid = Math.ceil(pv / n) + 1;
-  const copies = 2 * mid + 1;
-  const base = mid * n;
+  /* ---------- Arrastar (dedo ou mouse) ---------- */
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    drag.current = { active: true, startX: e.clientX, moved: false };
+    setPaused(true);
+    if (trackRef.current) trackRef.current.style.transition = "none";
+  };
 
-  const slides: SlideEl[] = [];
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d.active) return;
+    const dx = e.clientX - d.startX;
+    if (!d.moved && Math.abs(dx) > 6) {
+      d.moved = true;
+      viewportRef.current?.classList.add("is-dragging");
+    }
+    trackRef.current?.style.setProperty("--drag", `${dx}px`);
+  };
+
+  const endDrag = (e: ReactPointerEvent<HTMLDivElement>, cancelled = false) => {
+    const d = drag.current;
+    if (!d.active) return;
+    d.active = false;
+    viewportRef.current?.classList.remove("is-dragging");
+    setPaused(false);
+
+    const dx = cancelled ? 0 : e.clientX - d.startX;
+    const first = trackRef.current?.firstElementChild as HTMLElement | null;
+    const cardW = first ? first.getBoundingClientRect().width : 300;
+    const threshold = Math.min(70, cardW * 0.2);
+
+    if (Math.abs(dx) > threshold) manual(dx < 0 ? 1 : -1);
+    else apply(true); // volta ao lugar suavemente
+  };
+
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "ArrowLeft") manual(-1);
+    if (e.key === "ArrowRight") manual(1);
+  };
+
+  const slides: ReactElement[] = [];
   for (let r = 0; r < copies; r++) {
     items.forEach((el, i) => {
-      slides.push(
-        cloneElement(el, {
-          key: `${r}-${i}`,
-          "aria-hidden": r === mid ? undefined : true,
-        })
-      );
+      slides.push(cloneElement(el, { key: `${r}-${i}` }));
     });
   }
 
-  // Deslizar com o dedo (celular)
-  const onDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    startX.current = e.clientX;
-    dragged.current = false;
-    setPaused(true);
-  };
-  const onUp = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (startX.current !== null) {
-      const dx = e.clientX - startX.current;
-      startX.current = null;
-      if (Math.abs(dx) > 50) {
-        dragged.current = true;
-        manual(dx < 0 ? 1 : -1);
-      }
-    }
-    setPaused(false);
-  };
-
-  const trackStyle = {
-    "--pv": pv,
-    "--pos": base + offset,
-    transition: animate
-      ? `transform ${DURATION}ms cubic-bezier(0.22, 1, 0.36, 1)`
-      : "none",
-  } as CSSProperties;
+  const trackStyle = { "--pos": base, transition: "none" } as CSSProperties;
 
   return (
     <div
@@ -173,6 +231,7 @@ export default function TestimonialCarousel({
       role="region"
       aria-roledescription="carrossel"
       aria-label={label}
+      onKeyDown={onKeyDown}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -188,23 +247,25 @@ export default function TestimonialCarousel({
       </button>
 
       <div
+        ref={viewportRef}
         className="tcar__viewport"
-        onPointerDown={onDown}
-        onPointerUp={onUp}
-        onPointerCancel={() => {
-          startX.current = null;
-          setPaused(false);
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={(e) => endDrag(e)}
+        onPointerCancel={(e) => endDrag(e, true)}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") endDrag(e);
         }}
         onClickCapture={(e) => {
           // evita abrir um link sem querer logo após arrastar
-          if (dragged.current) {
+          if (drag.current.moved) {
             e.preventDefault();
             e.stopPropagation();
-            dragged.current = false;
+            drag.current.moved = false;
           }
         }}
       >
-        <div className="tcar__track" style={trackStyle}>
+        <div ref={trackRef} className="tcar__track" style={trackStyle}>
           {slides}
         </div>
       </div>

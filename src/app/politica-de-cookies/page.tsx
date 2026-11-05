@@ -1,44 +1,81 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import LegalPage from "@/components/LegalPage";
+
+export const metadata: Metadata = {
+  title: "Política de Cookies",
+  description: "Entenda como o site da Luciano Eletrotécnica usa cookies e o armazenamento do navegador.",
+  alternates: { canonical: "/politica-de-cookies" },
+  robots: { index: false, follow: true },
+};
 
 export default function CookiesPolicyPage() {
   return (
-    <main>
-      <section className="page-hero">
-        <div className="hero__glow" aria-hidden />
-        <div className="container page-hero__inner">
-          <div className="page-hero__top-nav" style={{ marginBottom: "1.5rem" }}>
-            <Link href="/" className="back">
-              <span aria-hidden>←</span> Voltar para Home
-            </Link>
-          </div>
-          <span className="eyebrow eyebrow--line">Legal</span>
-          <h1>Política de Cookies</h1>
-          <p>
-            O site da <strong>Luciano Eletrotécnica</strong> utiliza cookies para melhorar a experiência de navegação e desempenho da plataforma.
-          </p>
-        </div>
-      </section>
-
-      <section className="section section--alt">
-        <div className="container" style={{ maxWidth: "800px" }}>
-          <div style={{ display: "grid", gap: "1.5rem", color: "var(--text)", lineHeight: "1.7" }}>
-            <h3 style={{ color: "#fff", fontSize: "1.25rem" }}>O que são Cookies?</h3>
+    <LegalPage
+      title="Política de Cookies"
+      intro={
+        <>
+          Esta página explica como o site da <strong>Luciano Eletrotécnica</strong> usa cookies e recursos
+          semelhantes de armazenamento do navegador.
+        </>
+      }
+      sections={[
+        {
+          id: "o-que-sao",
+          title: "1. O que são cookies",
+          body: (
             <p>
-              Cookies são pequenos arquivos de texto armazenados no seu dispositivo (computador ou celular) quando você visita um site.
+              Cookies são pequenos arquivos de texto salvos no seu dispositivo quando você visita um site. Eles
+              servem, por exemplo, para lembrar preferências ou medir o uso de uma página.
             </p>
-
-            <h3 style={{ color: "#fff", fontSize: "1.25rem", marginTop: "1rem" }}>Como utilizamos?</h3>
+          ),
+        },
+        {
+          id: "o-que-usamos",
+          title: "2. O que usamos hoje",
+          body: (
+            <>
+              <p>
+                O site <strong>não utiliza cookies de publicidade nem ferramentas de rastreamento de terceiros</strong>.
+              </p>
+              <p>
+                Usamos apenas um recurso técnico do navegador (armazenamento de sessão) para lembrar
+                temporariamente qual serviço você escolheu, preenchendo o formulário de contato para você. Essa
+                informação fica somente no seu aparelho e é apagada quando você envia o formulário ou fecha a aba.
+              </p>
+            </>
+          ),
+        },
+        {
+          id: "links-externos",
+          title: "3. Links externos",
+          body: (
             <p>
-              Utilizamos cookies estritamente necessários para o funcionamento técnico do site e para analisar métricas de acesso de forma anônima, garantindo uma experiência rápida e segura.
+              Ao clicar em links para outros serviços, como o WhatsApp, você sai do nosso site. Esses serviços têm
+              suas próprias políticas de privacidade e de cookies, sobre as quais não temos controle.
             </p>
-
-            <h3 style={{ color: "#fff", fontSize: "1.25rem", marginTop: "1rem" }}>Gerenciamento</h3>
+          ),
+        },
+        {
+          id: "gerenciamento",
+          title: "4. Como gerenciar",
+          body: (
             <p>
-              Você pode configurar o seu navegador para recusar ou excluir cookies a qualquer momento, embora isso possa afetar algumas funcionalidades do site.
+              Você pode configurar seu navegador para bloquear ou apagar cookies a qualquer momento. As instruções
+              ficam nas configurações de privacidade do navegador que você usa.
             </p>
-          </div>
-        </div>
-      </section>
-    </main>
+          ),
+        },
+        {
+          id: "alteracoes",
+          title: "5. Alterações",
+          body: (
+            <p>
+              Se passarmos a usar ferramentas de análise ou publicidade, atualizaremos esta página e pediremos o
+              seu consentimento quando a lei exigir.
+            </p>
+          ),
+        },
+      ]}
+    />
   );
 }

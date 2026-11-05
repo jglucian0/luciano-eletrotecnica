@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export default function ScrollEffects() {
-  const bar = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
-    const root = document.documentElement;
     let raf = 0;
     let anim = 0;
     let ticking = false;
+    let lastHero: HTMLElement | null = null;
+    let lastP = -1;
 
     /* ---------- Rolagem suave nas âncoras ---------- */
     const cancelAnim = () => cancelAnimationFrame(anim);
@@ -38,18 +40,22 @@ export default function ScrollEffects() {
       const el = id ? document.getElementById(id) : null;
       if (!el) return;
       e.preventDefault();
-      scrollToY(Math.max(0, el.getBoundingClientRect().top + window.scrollY));
+      const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+      scrollToY(Math.max(0, el.getBoundingClientRect().top + window.scrollY - margin));
       history.replaceState(null, "", `#${id}`);
     };
 
-    /* ---------- Progresso e parallax ---------- */
+    /* ---------- Parallax do hero (só na seção do hero) ---------- */
     const update = () => {
       ticking = false;
-      const y = window.scrollY;
-      const vh = window.innerHeight;
-      const max = document.documentElement.scrollHeight - vh;
-      if (bar.current) bar.current.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
-      root.style.setProperty("--hero-p", String(Math.min(Math.max(y / vh, 0), 1)));
+      const hero = document.getElementById("inicio");
+      if (!hero) return;
+      const p = Math.min(Math.max(window.scrollY / window.innerHeight, 0), 1);
+      if (hero !== lastHero || p !== lastP) {
+        hero.style.setProperty("--hero-p", String(p));
+        lastHero = hero;
+        lastP = p;
+      }
     };
 
     const onScroll = () => {
@@ -59,9 +65,10 @@ export default function ScrollEffects() {
       }
     };
 
-    /* ---------- Brilho que segue o mouse ---------- */
+    /* ---------- Brilho que segue o mouse (formulário) ---------- */
     const onMove = (e: PointerEvent) => {
-      const t = (e.target as HTMLElement).closest<HTMLElement>(".feature, .form");
+      if (e.pointerType !== "mouse") return;
+      const t = (e.target as HTMLElement).closest<HTMLElement>(".form");
       if (!t) return;
       const r = t.getBoundingClientRect();
       t.style.setProperty("--mx", `${e.clientX - r.left}px`);
@@ -88,8 +95,7 @@ export default function ScrollEffects() {
       window.removeEventListener("touchstart", cancelAnim);
       window.removeEventListener("keydown", cancelAnim);
     };
-  }, []);
+  }, [pathname]);
 
   return null;
-  //return <div ref={bar} className="progress" aria-hidden />;
-} 
+}

@@ -6,7 +6,9 @@ import TestimonialCarousel from "@/components/TestimonialCarousel";
 import { services } from "@/lib/services";
 import Image from "next/image";
 import WhatsAppLink from "@/components/WhatsAppLink";
-import { GOOGLE_REVIEWS_URL, CITIES, PHONE_LABEL, WHATSAPP_NUMBER, buildWhatsAppUrl } from "@/lib/config";
+import { CITIES, CITY_LIST, CITY_NAMES, PHONE_LABEL, WHATSAPP_NUMBER, buildWhatsAppUrl } from "@/lib/config";
+import AboutShowcase, { type AboutStat, type AboutValue } from "@/components/AboutShowcase";
+import ProcessTimeline, { type FlowStep } from "@/components/ProcessTimeline";
 
 const serviceIcon: Record<string, IconName> = {
   eletrica: "bolt",
@@ -15,28 +17,93 @@ const serviceIcon: Record<string, IconName> = {
   starlink: "wifi",
 };
 
-const values: { t: string; d: string; icon: IconName }[] = [
-  { t: "Segurança", d: "Profissionais qualificados e materiais certificados em cada serviço.", icon: "shield" },
-  { t: "Agilidade", d: "Atendimento rápido e eficiente, sem deixar você esperando.", icon: "clock" },
-  { t: "Qualidade", d: "Serviços com garantia e materiais de primeira linha.", icon: "award" },
-  { t: "Organização", d: "Processos bem definidos, do primeiro contato à entrega.", icon: "clipboard" },
+const values: AboutValue[] = [
+  {
+    t: "Segurança",
+    icon: "shield",
+    d: "Profissionais qualificados e materiais certificados.",
+    points: [
+      "Disjuntores, DR e DPS dimensionados para cada circuito",
+      "Instalação dentro das normas técnicas",
+      "Acabamento seguro, sem fios expostos nem gambiarras",
+    ],
+  },
+  {
+    t: "Agilidade",
+    icon: "clock",
+    d: "Atendimento rápido e eficiente, sem deixar você esperando.",
+    points: [
+      "Retorno rápido pelo WhatsApp",
+      "Visita técnica combinada no seu horário",
+      "Serviço executado no prazo combinado",
+    ],
+  },
+  {
+    t: "Qualidade",
+    icon: "award",
+    d: "Serviços com garantia e materiais de primeira linha.",
+    points: [
+      "Materiais de primeira linha",
+      "Acabamento limpo e organizado",
+      "Garantia sobre o serviço executado",
+    ],
+  },
+  {
+    t: "Organização",
+    icon: "clipboard",
+    d: "Processos bem definidos, do primeiro contato à entrega.",
+    points: [
+      "Orçamento claro, com prazo e valores definidos",
+      "Circuitos e cabos identificados",
+      "Orientação de uso ao final do serviço",
+    ],
+  },
 ];
 
-const steps: { t: string; d: string; icon: IconName }[] = [
+// Números reais, calculados a partir dos seus dados
+const aboutStats: AboutStat[] = [
+  { value: services.length, label: "áreas de atuação" },
+  { value: CITIES.length, label: "cidades atendidas" },
+  { value: 100, suffix: "%", label: "orçamento sem compromisso" },
+  // Se quiser: { value: 10, prefix: "+", suffix: " anos", label: "de experiência" },
+];
+
+const steps: FlowStep[] = [
   {
     t: "Contato",
-    d: "Entre em contato pelo WhatsApp ou formulário e nos conte sua necessidade.",
-    icon: "clipboard" // Substituído message-circle
+    d: "Você chama no WhatsApp ou preenche o formulário e conta o que precisa.",
+    icon: "clipboard",
+    chat: [
+      { from: "client", text: "Oi! Preciso de um orçamento." },
+      { from: "us", text: "Olá! Me conta o que você precisa e em qual cidade está." },
+    ],
   },
   {
     t: "Alinhamento",
-    d: "Analisamos sua demanda, tiramos dúvidas e definimos a melhor solução para o seu caso.",
-    icon: "clock" // Substituído users
+    d: "Analisamos sua demanda, tiramos dúvidas e definimos a melhor solução, com proposta clara.",
+    icon: "clock",
+    chat: [
+      { from: "client", text: "Quero instalar câmeras de segurança em casa." },
+      { from: "us", text: "Perfeito! Vamos avaliar o local e te enviar uma proposta com valores e prazo." },
+    ],
   },
   {
     t: "Execução",
-    d: "Executamos o serviço com qualidade, organização e garantia.",
-    icon: "bolt" // Substituído wrench
+    d: "Realizamos o serviço com qualidade, organização e cuidado com o seu espaço.",
+    icon: "bolt",
+    chat: [
+      { from: "us", text: "Tudo combinado! Vamos executar com organização e dentro das normas." },
+      { from: "client", text: "Combinado, obrigado!" },
+    ],
+  },
+  {
+    t: "Entrega",
+    d: "Testes, orientações de uso e garantia do serviço realizado.",
+    icon: "shield",
+    chat: [
+      { from: "us", text: "Tudo testado e funcionando. A garantia do serviço está incluída ✅" },
+      { from: "client", text: "Ficou ótimo, obrigado! 👏" },
+    ],
   },
 ];
 
@@ -49,13 +116,7 @@ type Testimonial = {
 
 // Coloque aqui depoimentos REAIS de clientes.
 // Exemplo: { name: "Nome do cliente", text: "Texto do depoimento" }
-const realTestimonials: Testimonial[] = [
-  { name: "Nome do cliente", text: "Texto da avaliação", rating: 5, date: "há 2 meses" },
-  { name: "Nome do cliente 2", text: "Texto da avaliação", rating: 5, date: "há 2 meses" },
-  { name: "Nome do cliente 3", text: "Texto da avaliação", rating: 5, date: "há 2 meses" },
-  { name: "Nome do cliente 4", text: "Texto da avaliação", rating: 5, date: "há 2 meses" },
-  { name: "Nome do cliente 5", text: "Texto da avaliação", rating: 5, date: "há 2 meses" },
-];
+const realTestimonials: Testimonial[] = [];
 
 // Modelos só para você ver o layout durante o desenvolvimento (npm run dev).
 // Em produção (site publicado) eles não aparecem.
@@ -77,7 +138,7 @@ export default function Home() {
   return (
     <main>
       {/* HERO */}
-      <section id="inicio" className="hero">
+      <section id="inicio" className="hero" suppressHydrationWarning>
         <div className="hero__bg" aria-hidden />
         <div className="hero__glow" aria-hidden />
         {/* <svg className="hero__bolt" viewBox="0 0 100 160" aria-hidden>
@@ -101,8 +162,9 @@ export default function Home() {
               alt=""
               fill
               priority
-              unoptimized
-              style={{ objectFit: 'cover' }}
+              sizes="(max-width: 960px) 100vw, 530px"
+              quality={75}
+              style={{ objectFit: "cover" }}
             />
           </div>
 
@@ -113,8 +175,9 @@ export default function Home() {
               alt="Luciano Eletrotécnica - Atendimento Profissional"
               fill
               priority
-              unoptimized
-              style={{ objectFit: 'cover' }}
+              sizes="(max-width: 960px) 100vw, 530px"
+              quality={80}
+              style={{ objectFit: "cover" }}
             />
           </div>
 
@@ -127,8 +190,8 @@ export default function Home() {
             Soluções <span className="accent">completas</span> para sua casa ou empresa.
           </h1>
           <p>
-            Elétrica, segurança eletrônica e soluções para TV, com atendimento rápido, organizado e sem
-            dor de cabeça.
+            Elétrica, segurança eletrônica, TV e Starlink para casas e empresas em {CITY_LIST}, com
+            atendimento rápido, organizado e sem dor de cabeça.
           </p>
           <div className="hero__cta">
             <WhatsAppLink className="btn btn--primary">
@@ -160,7 +223,13 @@ export default function Home() {
                 <article key={s.slug} className="scard">
                   {s.image && (
                     <div className="scard__bg" aria-hidden>
-                      <Image src={s.image} alt="" fill sizes="(max-width: 960px) 85vw, 380px" />
+                      <Image
+                        src={s.image}
+                        alt=""
+                        fill
+                        quality={60}
+                        sizes="(max-width: 640px) 90vw, (max-width: 960px) 45vw, 380px"
+                      />
                     </div>
                   )}
                   <div className="scard__top">
@@ -195,59 +264,14 @@ export default function Home() {
       {/* SOBRE */}
       <section id="sobre" className="section">
         <div className="container">
-          <Reveal className="sec-head">
-            <span className="eyebrow">Sobre</span>
-            <h2>
-              Sobre <span className="accent">Luciano Eletrotécnica</span>
-            </h2>
-            <p className="lead">
-              Somos especializados em serviços elétricos para residências e empresas, além de segurança
-              eletrônica e soluções para TV. Trabalhamos com foco em qualidade, transparência, organização
-              e agilidade no atendimento.
-            </p>
-          </Reveal>
-
-          <div className="vgrid">
-            {values.map((v, i) => (
-              <Reveal key={v.t} delay={i * 100}>
-                <div className="vcard">
-                  <span className="icon-box">
-                    <Icon name={v.icon} size={26} />
-                  </span>
-                  <h3>{v.t}</h3>
-                  <p>{v.d}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          <AboutShowcase values={values} stats={aboutStats} cities={CITY_NAMES} />
         </div>
       </section>
 
       {/* COMO FUNCIONA */}
       <section id="como-funciona" className="section section--alt">
         <div className="container">
-          <Reveal className="sec-head">
-            <span className="eyebrow">Como funciona</span>
-            <h2>Como funciona</h2>
-            <p className="lead">Processo simples e transparente do início ao fim.</p>
-          </Reveal>
-
-          <div className="how">
-            {steps.map((s, i) => (
-              <Reveal key={s.t} delay={i * 140} className="how__wrapper">
-                <div className="how__item">
-                  <span className="how__n">{String(i + 1).padStart(2, "0")}</span>
-
-                  <div className="how__icon">
-                    <Icon name={s.icon} size={26} />
-                  </div>
-
-                  <h3>{s.t}</h3>
-                  <p>{s.d}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+          <ProcessTimeline steps={steps} />
         </div>
       </section>
 

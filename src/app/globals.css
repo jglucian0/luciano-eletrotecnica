@@ -38,9 +38,9 @@
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* Durações (valores ajustados por você) */
-  --t-fast: 0.8s;
-  --t-base: 1.5s; /* base de quase todas as transições do site */
-  --t-slow: 2.2s;
+  --t-fast: 0.3s;
+  --t-base: 0.6s;
+  --t-slow: 0.9s;
 
   /* Distância da borda da tela até o limite do .container */
   --edge: max(1.25rem, calc((100% - 1120px) / 2));
@@ -948,210 +948,439 @@ h2 {
 }
 
 /* =========================================================
-   09. SOBRE (cards de valores)
+   22. SOBRE (abas interativas) E COMO FUNCIONA (linha do tempo)
    ========================================================= */
-.vgrid {
+
+/* ---------- Sobre ---------- */
+.about {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: 1fr 1.05fr;
+  gap: clamp(2rem, 6vw, 4.5rem);
+  align-items: center;
 }
-.vgrid > .reveal {
-  display: flex;
+.about h2 {
+  margin-bottom: 1rem;
 }
-.vcard {
-  width: 100%;
-  padding: 2rem 1.75rem;
-  text-align: center;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  transition:
-    transform 0.4s var(--ease),
-    border-color 0.3s var(--ease),
-    box-shadow 0.4s var(--ease),
-    background-color 0.3s var(--ease);
-}
-.vcard:hover {
-  transform: translateY(-5px);
-  border-color: rgba(255, 106, 0, 0.45);
-  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6);
-}
-.vcard .icon-box {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  margin: 0 auto 1.25rem;
-}
-.vcard h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.4rem;
-}
-.vcard p {
-  color: var(--muted);
-  font-size: 0.93rem;
+.about .lead {
+  max-width: 520px;
+  margin: 0 0 2rem;
 }
 
-@media (max-width: 960px) {
-  .vgrid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    gap: 1rem;
-    padding: 1.5rem 0.5rem 2rem;
-    margin-inline: -1rem;
-    padding-inline: 1rem;
-  }
-
-  .vgrid::-webkit-scrollbar {
-    display: none; /* Oculta a barra de rolagem no mobile */
-  }
-
-  .vgrid > .reveal {
-    flex: 0 0 82%; /* Define a largura do card no carrossel mobile */
-    scroll-snap-align: center;
-  }
-}
-
-/* =========================================================
-   10. COMO FUNCIONA
-   ========================================================= */
-.how {
-  position: relative;
+.about__stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  padding-top: 1rem; /* espaço para o número sobreposto */
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
-
-/* Linha horizontal: começa escondida e só se desenha depois dos cards */
-.how::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  right: 10%;
-  height: 1px;
-  background: var(--line);
-  z-index: 0;
-  opacity: 0;
-  transform: translateY(-50%) scaleX(0);
-  transform-origin: center;
-  transition:
-    opacity 1.2s var(--ease),
-    transform 1.6s var(--ease);
-}
-.how:has(.reveal--in)::before {
-  opacity: 1;
-  transform: translateY(-50%) scaleX(1);
-  transition-delay: 1.2s; /* espera os cards terminarem de aparecer */
-}
-
-.how__wrapper {
-  position: relative;
-  z-index: 1; /* cards e números acima da linha */
-  display: flex;
-}
-.how__item {
-  position: relative;
-  width: 100%;
-  text-align: center;
-  padding: 3rem 1.75rem 2rem;
-  background: var(--card);
+.stat {
+  padding: 1.1rem 1rem;
   border: 1px solid var(--line);
   border-radius: 16px;
-  transition:
-    transform 1.2s var(--ease),
-    border-color 1.2s var(--ease),
-    box-shadow 1.2s var(--ease),
-    background-color 1.2s var(--ease);
+  background: rgba(6, 41, 74, 0.5);
 }
-.how__item:hover {
-  transform: translateY(-6px);
-  border-color: rgba(255, 106, 0, 0.45);
-  box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.6);
+.stat__n {
+  display: block;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #fff;
+}
+.stat__l {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--muted);
 }
 
-/* Número em formato de pílula */
-.how__n {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 28px;
-  border-radius: 14px;
+.about__cities-title {
+  margin-bottom: 0.7rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  /* text-transform: uppercase; */
+  color: var(--muted);
+}
+.about__cities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.city {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  transition:
+    border-color 0.3s var(--ease),
+    background-color 0.3s var(--ease),
+    transform 0.4s var(--ease);
+}
+.city::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   background: var(--orange);
-  color: #fff;
-  font-weight: 700;
-  font-size: 0.85rem;
-  box-shadow: 0 4px 12px -2px rgba(255, 106, 0, 0.6);
-  transition:
-    transform 1.2s var(--ease),
-    background-color 1.2s var(--ease);
 }
-.how__item:hover .how__n {
-  background-color: var(--orange-600);
-  transform: translate(-50%, -60%);
+.city:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 106, 0, 0.6);
+  background: rgba(255, 106, 0, 0.08);
 }
 
-.how__icon {
+/* Cartão com abas */
+.about__card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(6, 41, 74, 0.55);
+}
+.about__tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+.about__tab {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+  padding: 1rem 0.4rem 0.95rem;
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.3s var(--ease),
+    background-color 0.3s var(--ease);
+}
+.about__tab:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.03);
+}
+.about__tab[aria-selected="true"] {
+  color: #fff;
+}
+.about__tab[aria-selected="true"] svg {
+  color: var(--orange);
+}
+
+/* Barra de progresso: ao terminar, avança para a próxima aba */
+.about__bar {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 2px;
+  background: var(--orange);
+  transform: scaleX(0);
+  transform-origin: left;
+  animation: about-fill 6s linear forwards;
+}
+@keyframes about-fill {
+  to {
+    transform: scaleX(1);
+  }
+}
+.about__card:hover .about__bar,
+.about__card:focus-within .about__bar,
+.about:not([data-inview="true"]) .about__bar {
+  animation-play-state: paused;
+}
+
+.about__panel {
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  animation: panel-in 0.6s var(--ease) both;
+}
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.about__panel-head {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.about__panel h3 {
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+.about__panel > p {
+  margin-bottom: 1.25rem;
+  color: var(--muted);
+}
+.about__panel .ticks {
+  margin-bottom: 0;
+}
+.about__panel .ticks li {
+  opacity: 0;
+  animation: panel-in 0.6s var(--ease) forwards;
+}
+.about__panel .ticks li:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.about__panel .ticks li:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.about__panel .ticks li:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.about__panel .ticks li:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+@media (max-width: 900px) {
+  .about {
+    grid-template-columns: 1fr;
+  }
+  .city {
+    font-size: 0.75rem;
+  }
+}
+@media (max-width: 520px) {
+  .about__tab {
+    font-size: 0.7rem;
+  }
+  .about__stats {
+    gap: 0.6rem;
+  }
+  .stat {
+    padding: 0.9rem 0.7rem;
+  }
+}
+
+/* ---------- Como funciona ---------- */
+.flow {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: clamp(2rem, 6vw, 5rem);
+}
+.flow h2 {
+  margin-bottom: 1rem;
+}
+.flow .lead {
+  margin: 0 0 1.75rem;
+}
+/* Coluna da esquerda fica fixa enquanto os passos rolam */
+.flow__sticky {
+  position: sticky;
+  top: 110px;
+}
+
+.flow__meter {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 320px;
+  margin-bottom: 1.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.flow__meter b {
+  color: var(--text);
+}
+.flow__meterbar {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: var(--line);
+}
+.flow__meterbar i {
+  display: block;
+  height: 100%;
+  background: var(--orange);
+  transform: scaleX(var(--w, 0));
+  transform-origin: left;
+  transition: transform 0.7s var(--ease);
+}
+
+.flow__list {
+  display: grid;
+}
+.flow__step {
+  position: relative;
+  padding: 0 0 2.25rem 4.25rem;
+}
+.flow__step:last-child {
+  padding-bottom: 0;
+}
+
+/* Bolinha do passo */
+.flow__dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
   display: grid;
   place-items: center;
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 1.5rem;
-  border-radius: 16px;
-  background: rgba(255, 106, 0, 0.12);
-  color: var(--orange);
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  color: var(--muted);
   transition:
-    background-color 1.2s var(--ease),
-    color 1.2s var(--ease),
-    transform 1.2s var(--ease);
+    background-color 0.5s var(--ease),
+    border-color 0.5s var(--ease),
+    color 0.5s var(--ease),
+    box-shadow 0.5s var(--ease),
+    transform 0.5s var(--ease);
 }
-.how__item:hover .how__icon {
-  background-color: var(--orange);
+.flow__step.is-reached .flow__dot {
+  background: var(--orange);
+  border-color: var(--orange);
   color: #fff;
-  transform: rotate(-6deg) scale(1.06);
+}
+.flow__step.is-active .flow__dot {
+  transform: scale(1.08);
+  box-shadow:
+    0 0 0 6px rgba(255, 106, 0, 0.18),
+    0 10px 28px -8px rgba(255, 106, 0, 0.7);
 }
 
-.how__item h3 {
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+/* Linha que liga um passo ao próximo e se preenche */
+.flow__rail {
+  position: absolute;
+  left: 22px;
+  top: 46px;
+  bottom: 0;
+  width: 2px;
+  overflow: hidden;
+  background: var(--line);
 }
-.how__item p {
+.flow__rail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--orange);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.9s var(--ease);
+}
+.flow__step.is-done .flow__rail::after {
+  transform: scaleY(1);
+}
+
+/* Cartão do passo */
+.flow__card {
+  padding: 1.5rem 1.5rem 1.4rem;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--card);
+  opacity: 0.4;
+  transform: translateY(8px);
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.6s var(--ease),
+    border-color 0.4s var(--ease),
+    box-shadow 0.4s var(--ease);
+}
+.flow__step.is-reached .flow__card {
+  opacity: 1;
+  transform: none;
+}
+.flow__step.is-active .flow__card {
+  border-color: rgba(255, 106, 0, 0.45);
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.7);
+}
+.flow__tag {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.flow__card h3 {
+  margin-bottom: 0.4rem;
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+.flow__card p {
   color: var(--muted);
   font-size: 0.95rem;
-  line-height: 1.5;
 }
 
-@media (max-width: 860px) {
-  .how {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    gap: 1rem;
-    padding: 1.5rem 0.5rem 2rem;
-    margin-inline: -1rem;
-    padding-inline: 1rem;
-  }
+/* Mini conversa de WhatsApp */
+.chat {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1.1rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(0, 24, 46, 0.55);
+}
+.bubble {
+  max-width: 82%;
+  padding: 0.55rem 0.85rem;
+  border-radius: 14px;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+  transition:
+    opacity 0.5s var(--ease),
+    transform 0.5s var(--ease);
+}
+.bubble--us {
+  justify-self: start;
+  border-bottom-left-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.bubble--client {
+  justify-self: end;
+  border: 1px solid rgba(255, 106, 0, 0.35);
+  border-bottom-right-radius: 4px;
+  background: rgba(255, 106, 0, 0.2);
+}
+.flow__step.is-reached .bubble {
+  opacity: 1;
+  transform: none;
+}
 
-  .how::-webkit-scrollbar {
-    display: none; /* Oculta a barra de rolagem no mobile mantendo a rolagem fluida */
-  }
+.flow__note {
+  margin: 1.5rem 0 0 4.25rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
 
-  .how::before {
-    display: none;
+@media (max-width: 900px) {
+  .flow {
+    grid-template-columns: 1fr;
   }
-
-  .how__wrapper {
-    flex: 0 0 85%; /* Deixa o card com boa largura para o carrossel */
-    scroll-snap-align: center;
+  .flow__sticky {
+    position: static;
+  }
+}
+@media (max-width: 520px) {
+  .flow__step {
+    padding-left: 3.5rem;
+  }
+  .flow__dot {
+    width: 40px;
+    height: 40px;
+  }
+  .flow__rail {
+    left: 19px;
+    top: 40px;
+  }
+  .flow__note {
+    margin-left: 3.5rem;
   }
 }
 
@@ -1429,7 +1658,6 @@ h2 {
 .cta-final {
   padding-block: clamp(4rem, 9vw, 7rem);
   text-align: center;
-  background: linear-gradient(135deg, var(--navy) 0%, var(--bg) 100%);
   border-top: 1px solid var(--line);
   overflow: hidden;
 }
@@ -1990,6 +2218,210 @@ button:focus-visible {
 /* Entrada suave ao trocar de página */
 main {
   animation: page-in var(--t-slow) var(--ease);
+}
+
+/* =========================================================
+   20. OTIMIZAÇÕES (desempenho, fluidez e responsividade)
+   ========================================================= */
+
+/* Evita rolagem horizontal causada pelas animações laterais (esquerda/direita) */
+body {
+  overflow-x: clip;
+}
+
+/* Sem fade de 2s na página inteira: o conteúdo principal aparece na hora */
+main {
+  animation: none;
+}
+
+/* Hero: texto aparece rápido (antes levava ~2,7s) */
+.hero__content > * {
+  animation-duration: 0.9s;
+}
+.hero__content > :nth-child(2) {
+  animation-delay: 0.1s;
+}
+.hero__content > :nth-child(3) {
+  animation-delay: 0.2s;
+}
+.hero__content > :nth-child(4) {
+  animation-delay: 0.3s;
+}
+.hero__content > :nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+/* will-change em dezenas de blocos consome memória à toa */
+.reveal {
+  will-change: auto;
+}
+
+/* WhatsApp flutuante: anel animado só com transform/opacity (não repinta a tela) */
+.wa-float {
+  animation: none;
+}
+.wa-float::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 50%;
+  background: #25d366;
+  opacity: 0.5;
+  animation: ping 2.5s ease-out infinite;
+}
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    transform: scale(1.7);
+    opacity: 0;
+  }
+}
+
+/* Carrossel: cards por tela vindo do CSS (sem "pulo" no carregamento) */
+.tcar {
+  --pv: 3;
+}
+@media (max-width: 960px) {
+  .tcar {
+    --pv: 2;
+  }
+}
+@media (max-width: 640px) {
+  .tcar {
+    --pv: 1;
+  }
+}
+
+.tcar__track {
+  transform: translateX(
+    calc(var(--pos, 0) * -1 * (var(--card-w) + var(--gap)) + var(--drag, 0px))
+  );
+}
+.tcar__viewport {
+  cursor: grab;
+}
+.tcar__viewport.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+}
+.tcar img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Bullets: área de toque maior no celular (o visual continua o mesmo) */
+.tcar__dot {
+  position: relative;
+}
+.tcar__dot::after {
+  content: "";
+  position: absolute;
+  inset: -10px -4px;
+}
+
+/* Celular: blur de fundo é pesado em aparelhos mais simples */
+@media (max-width: 760px) {
+  .form,
+  .cta-panel {
+    backdrop-filter: none;
+    background: rgba(6, 41, 74, 0.92);
+  }
+}
+
+/* =========================================================
+   21. PÁGINAS LEGAIS
+   ========================================================= */
+.legal__date {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.legal {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+}
+
+/* Índice lateral */
+.legal__toc {
+  position: sticky;
+  top: 96px;
+  display: grid;
+  gap: 0.9rem;
+  padding: 1.25rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(6, 41, 74, 0.5);
+  font-size: 0.9rem;
+}
+.legal__toc strong {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.legal__toc ol {
+  display: grid;
+  gap: 0.6rem;
+}
+.legal__toc a {
+  color: var(--muted);
+  transition: color 0.3s var(--ease);
+}
+.legal__toc a:hover {
+  color: var(--text);
+}
+
+/* Texto */
+.legal__body {
+  display: grid;
+  gap: 2.5rem;
+  max-width: 720px;
+  line-height: 1.75;
+}
+.legal__body section {
+  scroll-margin-top: 96px;
+}
+.legal__body section > * + * {
+  margin-top: 0.9rem;
+}
+.legal__body h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+.legal__body ul {
+  display: grid;
+  gap: 0.45rem;
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+.legal__body li::marker {
+  color: var(--orange);
+}
+.legal__body a {
+  color: var(--orange);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.legal__body strong {
+  color: #fff;
+}
+
+@media (max-width: 860px) {
+  .legal {
+    grid-template-columns: 1fr;
+  }
+  .legal__toc {
+    position: static;
+  }
 }
 
 /* =========================================================

@@ -1,15 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Reveal from "@/components/Reveal";
-import { services, getService } from "@/lib/services";
 import { Suspense } from "react";
+import Reveal from "@/components/Reveal";
 import WhatsAppLink from "@/components/WhatsAppLink";
-import FormLink from "@/components/FormLink";
-import Icon from "@/components/Icon";
-import { GOOGLE_REVIEWS_URL, CITIES, PHONE_LABEL, WHATSAPP_NUMBER, buildWhatsAppUrl } from "@/lib/config";
-
-import type { IconName } from "@/components/Icon";
+import Icon, { type IconName } from "@/components/Icon";
+import JsonLd from "@/components/JsonLd";
+import { services, getService } from "@/lib/services";
+import {
+  CITIES,
+  CITY_LIST,
+  CITY_NAMES,
+  PHONE_LABEL,
+  SITE_URL,
+  WHATSAPP_NUMBER,
+  buildWhatsAppUrl,
+} from "@/lib/config";
 
 const serviceIcon: Record<string, IconName> = {
   eletrica: "bolt",
@@ -20,6 +26,8 @@ const serviceIcon: Record<string, IconName> = {
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const dynamicParams = false; // endereços que não existem retornam 404 direto
+
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));
 }
@@ -27,7 +35,18 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const s = getService(slug);
-  return s ? { title: s.title, description: s.heroLead } : {};
+  if (!s) return {};
+
+  const title = `${s.title} em ${CITY_NAMES[0]} e região`;
+  const description = `${s.heroLead} Atendemos ${CITY_LIST} (PR). Orçamento pelo WhatsApp.`;
+  const url = `/servicos/${s.slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { type: "website", locale: "pt_BR", url, siteName: "Luciano Eletrotécnica", title, description },
+  };
 }
 
 export default function ServicePage({ params }: Props) {
@@ -43,8 +62,32 @@ async function ServiceContent({ params }: Props) {
   const s = getService(slug);
   if (!s) notFound();
 
+  const url = `${SITE_URL}/servicos/${s.slug}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Service",
+        name: s.title,
+        serviceType: s.title,
+        description: s.heroLead,
+        url,
+        provider: { "@type": "Electrician", name: "Luciano Eletrotécnica", url: SITE_URL },
+        areaServed: CITY_NAMES.map((name) => ({ "@type": "City", name })),
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Início", item: SITE_URL },
+          { "@type": "ListItem", position: 2, name: s.title, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
     <main>
+      <JsonLd data={jsonLd} />
       <section className="page-hero">
         <div className="container page-hero__inner">
           <div className="page-hero__top-nav" style={{ marginBottom: "1.5rem" }}>
